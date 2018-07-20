@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="/public/css/style.css" type="text/css"/>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="/public/js/util.js"></script>
+  <script>
+      var urlStem = urlToParams(window.location)['type'] || 'bus';
+
+      function stemUrl(url) {
+        return "/" + urlStem + url;
+      }
+
+      function populateLocations(route) {
+        var stopsDeferred = route.stopNumbers.map(stopId => getPath(stemUrl("/stops/" + stopId)));
+        $.when(...stopsDeferred).done(function() {
+          var locationData = Array.from(arguments).map((a, i) => [i, a[0].stopName]);
+          addOptions($("#location-input"), locationData);
+        });
+      }
+
+      function updateLocations(routeId) {
+        if (routeId != null && routeId != "") {
+          getPath(stemUrl("/routes/" + routeId)).then(populateLocations);
+        }
+      }
+
+      $(document).ready(function() {
+        wireForm({
+         form: $("#data-form"),
+         submit: $("#submit-button"),
+         submitUrl: stemUrl("/vehicles"),
+          redirectTo: stemUrl("/vehicles.html")});
+
+        $("#route-input").change(function(e) {
+          updateLocations($("#route-input").val());
+        });
+
+        getPath(stemUrl("/routes")).done(function(routesResponse) {
+          var routesOptions = routesResponse.routes.map(route => [route.id, route.routeName]);
+          addOptions($("#route-input"), routesOptions);
+          updateLocations($("#route-input").val());
+        });
+      });
+    </script>
+</head>
+<body>
+<!-- TODO: Generalize this using query-params so it can work for buses or trains -->
+<p>Create a Vehicle</p>
+<form id="data-form">
+  <label for="route-input">route</label>
+  <select id="route-input" name="route">
+  </select>
+
+  <label for="location-input">location</label>
+  <select id="location-input" name="location">
+  </select>
+
+  <label for="capacity-input">capacity</label>
+  <input id="capacity-input" type="number" name="capacity" />
+
+  <label for="speed-input">speed</label>
+  <input id="speed-input" type="number" name="speed" />
+
+  <label for="is-moving-input">Start moving?</label>
+  <input id="is-moving-input" type="checkbox" name="isMoving" value="true" checked />
+
+  <button id="submit-button">Create</button>
+</form>
+</body>
+</html>

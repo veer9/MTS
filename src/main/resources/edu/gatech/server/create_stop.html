@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="/public/css/style.css" type="text/css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="/public/js/util.js"></script>
+    <script>
+      $(document).ready(function() {
+        var pageUrl = new URL(window.location);
+        if (pageUrl.search.search("type=rail") > 0) {
+          wireForm({form: $("#data-form"), submit: $("#submit-button"), submitUrl: "/rail/stops", redirectTo: "/rail/stops.html"});
+          $("#submit-button").html("Create rail stop");
+        } else {
+          wireForm({form: $("#data-form"), submit: $("#submit-button"), submitUrl: "/bus/stops", redirectTo: "/bus/stops.html"});
+          $("#submit-button").html("Create bus stop");
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <p>Create a stop</p>
+    <form id="data-form">
+      <label for="stopName-input">stop name:</label>
+      <input id="stopName-input" type="text" name="stopName" />
+
+      <label for="xCoord-input">xCoord:</label>
+      <input id="xCoord-input" type="number" name="xCoord" />
+
+      <label for="yCoord-input">yCoord:</label>
+      <input id="yCoord-input" type="number" name="yCoord" />
+
+      <button id="submit-button">Create Stop</button>
+    </form>
+  </body>
+</html>

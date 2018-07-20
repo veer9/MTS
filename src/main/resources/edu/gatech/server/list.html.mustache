@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="/public/css/style.css" type="text/css"/>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="/public/js/util.js"></script>
+  <script src="/public/js/list.js"></script>
+  <script>
+    var overrides = {
+      {{#getOverrideEntries}}
+        "{{key}}" : {{value}},
+      {{/getOverrideEntries}}
+    };
+
+    $(function() {
+      getPath("{{getSourceURL}}").then(function (e) {
+        console.log(e);
+        var items = e.{{getSourceItems}};
+        if (items.length == 0) {
+          $("#main").html("<p>Sorry, no {{getSourceItems}}<p>");
+        } else {
+          var firstItem = items[0];
+          //TODO: Apply bootstrap styles
+          var thtml = "<thead><tr>";
+          var keys = Object.keys(firstItem);
+          keys.forEach(function(key) {
+            thtml += "<th>" + key + "</th>";
+          });
+          thtml += "</tr></thead>";
+          thtml += "<tbody>";
+          var row = 0;
+          items.forEach(function(item) {
+            thtml += "<tr>";
+            keys.forEach(function(key) {
+              if (key in overrides) {
+                var itemId = key + "-" + row;
+                thtml += `<td id="${itemId}"></td>`;
+                overrides[key](item[key], itemId);
+              } else {
+                thtml += "<td>" + item[key] + "</td>";
+              }
+            });
+            thtml += "</tr>";
+            row += 1;
+          })
+          thtml += "</tbody>";
+          $("#resource-table").html(thtml);
+        }
+      })
+    });
+  </script>
+</head>
+<body>
+
+<div class="container">
+  <div id="main" class="row">
+    <table id="resource-table">
+
+    </table>
+  </div>
+  <p><a href="{{createPath}}">Create {{getSourceItems}}</a></p>
+</div>
+
+</body>
+</html>

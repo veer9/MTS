@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="/public/css/style.css" type="text/css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="/public/js/util.js"></script>
+    <script src="/public/js/route.js"></script>
+    <script>
+      var urlStem = urlToParams(window.location)['type'] || 'bus';
+
+      $(document).ready(function() {
+        var stopsData = [];
+        var beforeSubmit = addStopIds;
+        if (urlStem == "bus") {
+          beforeSubmit = addStopIdsAndRoads;
+        }
+        wireForm({
+          form: $("#data-form"),
+          submit: $("#submit-button"),
+          submitUrl: "/" + urlStem + "/routes",
+          beforeSubmit: beforeSubmit,
+          redirectTo: "/" + urlStem + "/routes.html"
+        });
+        getPath("/" + urlStem + "/stops").done(function(stopsResponse) {
+          stopsData = stopsResponse.stops.map(stop => [stop.id, stop.stopName]);
+          addNextStop(stopsData, urlStem);
+        });
+        $("#add-stop").click(function (e) { addNextStop(stopsData, urlStem) });
+      });
+    </script>
+  </head>
+  <body>
+    <p>Create a Route</p>
+    <form id="data-form">
+      <label for="routeNumber-input">routeNumber</label>
+      <input id="routeNumber-input" type="number" name="routeNumber" />
+
+      <label for="routeName-input">routeName</label>
+      <input id="routeName-input" type="text" name="routeName" />
+
+      <ol id="stops-list">
+      </ol>
+      <button type="button" id="add-stop">+ Add Stop</button>
+
+      <button id="submit-button">Create Route</button>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+html {
+  height: 100%;
+}
+html body {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+html body .container-fluid.body-content {
+  width: 100%;
+  overflow-y: auto;
+  height: 100%;
+
+}
+header {
+    min-height: 50px;
+    width: 100%;
+}
+footer {
+    min-height: 30px;
+    width: 100%;
+}
+
+.leftpane {
+    width: 50%;
+    height: 100%;
+    float: left;
+    border-collapse: collapse;
+}
+
+.rightpane {
+    width: 50%;
+    height: 100%;
+    float: right;
+    border-collapse: collapse;
+}
+
+.ul_inline {
+    display: inline-block;
+}
+
+.ul_inline > li {
+    display: inline;
+}
+
+.box {
+}
+
+.button-list {
+    list-style: none;
+}
+
+.button-list > li {
+    margin-bottom: 10px;
+}
+
+

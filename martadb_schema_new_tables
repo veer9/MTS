@@ -1,0 +1,41 @@
+CREATE TABLE rider_distribution
+(
+    rider_id integer,
+    route integer[],
+    start_stop integer,
+    dest_stop integer,
+    travel_mode integer,
+    PRIMARY KEY (rider_id)
+);
+
+CREATE TABLE road_info
+(
+    road_id integer,
+    route_id integer,
+    stop1 integer,
+    stop2 integer,
+    road_work integer,
+    speed_limit integer,
+    traffic character varying(258) COLLATE pg_catalog."default",
+    PRIMARY KEY (road_id)
+);
+
+CREATE TABLE transit_info
+(
+    rail_route integer,
+    rail_stop integer,
+    bus_route integer,
+    bus_stop integer
+);
+
+CREATE TABLE train_data
+(
+    train_id integer,
+    route_id integer,
+    route_name character varying(258) COLLATE pg_catalog."default",
+    stop_id integer,
+    stop_name character varying(258) COLLATE pg_catalog."default",
+    route_direction character varying(258) COLLATE pg_catalog."default"
+);
+
+

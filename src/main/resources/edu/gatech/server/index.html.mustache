@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<!-- change default mustache delimiter so as not to interfere with angular-->
+{{=<< >>=}}
+<html>
+    <head>
+      <meta charset="utf-8"/>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+      <link rel="stylesheet" href="/public/css/style.css" type="text/css"/>
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+      <script src="/public/js/scripts.js"></script>
+      <script>
+          function executeRun(steps) {
+            $.ajax({
+                method : "POST",
+                data: JSON.stringify({stepsToRun: steps}),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: "/run"
+            });
+          }
+          function loadData() {
+            $.ajax({
+                method : "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: "/load"
+            });
+          }
+          function reset() {
+            $.ajax({
+                method : "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: "/reset"
+            });
+          }
+          $(document).ready(function() {
+              $("#run-single").click(function() {
+                executeRun(1);
+              });
+              $("#run-multi").click(function() {
+                executeRun(Number($("#multi-step-count").val()));
+              });
+              $("#load-data").click(function() {
+                loadData();
+              });
+              $("#reset").click(function() {
+                reset();
+              });
+          });
+      </script>
+    </head>
+    <body ng-app="simulationApp" ng-controller="simulationCtrl">
+        <header class="bg-light">
+            <h5>
+                Ride Simulation
+            </h5>
+            <ul class="ul_inline">
+                <li><button id="run-single" type="button" class="btn btn-primary">Run next event</button></li>
+                <li><button id="run-multi" type="button" class="btn btn-primary">Run multiple events</button>
+                <input type="number" id="multi-step-count" value="50"/></li>
+                <li><button id="load-data" type="button" class="btn btn-warning">Load Simulation Data</button></li>
+                <li><button id="reset" type="button" class="btn btn-danger">Reset Transit system</button></li>
+            </ul>
+        </header>
+        <div class="container-fluid body-content">
+            <div class="leftpane">
+
+              <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
+
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="modal-title">Create a passenger</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table>
+                            <tr>
+                                <td>
+                                    Transit System
+                                </td>
+                                <td>
+                                    <select ng-change="retrieveRoutes()" ng-model="selectedTransit">
+                                        <option ng-repeat="transit in transitNames" ng-value="transit.identifier">{{transit.name}}</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Routes
+                                </td>
+                                <td>
+                                    <select ng-model="selectedRoute" ng-change="retrieveStops()">
+                                        <option ng-repeat="route in transitRoutes" ng-value="route">{{route.routeNumber}}:{{route.routeName}}</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Begin Stop
+                                </td>
+                                <td>
+                                    <select ng-model="beginStop">
+                                        <option ng-repeat="beginStop in transitStops" ng-value="beginStop.id">{{beginStop.stopName}}</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    End Stop
+                                </td>
+                                <td>
+                                    <select ng-model="endStop">
+                                        <option ng-repeat="endStop in transitStops" ng-value="endStop.id">{{endStop.stopName}}</option>
+                                    </select>
+
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" ng-click="submitRiderCreation()" data-dismiss="modal">Submit</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <div class="modal fade" id="PassengerView" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Riders</h4>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-striped table-condensed">
+                                <thead>
+                                    <th>Begin Stop</th>
+                                    <th>End Stop</th>
+                                    <th>TravelMode</th>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="rider in riders">
+                                        <td>{{rider.beginStop}}</td>
+                                        <td>{{rider.endStop}}</td>
+                                        <td>{{rider.travelMode}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                     </div>
+                </div>
+              </div>
+                <h4>Bus</h4>
+                <table style="width:100%;height:5%;">
+                    <tr>
+                        <td>
+                            <a href="/bus/stops.html">Bus Stops: <span id="bus-stops-count"></span></a>
+                        </td>
+                        <td align="right">
+                            <a class="btn btn-primary btn-sm" href="/create_stop.html?type=bus">Create a bus stop</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/bus/routes.html">Bus Routes: <span id="bus-routes-count"></span></a>
+                            </td>
+                        <td align="right">
+                            <a class="btn btn-primary btn-sm" href="/create_route.html?type=bus">Create a route</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/bus/vehicles.html">Buses: <span id="buses-count"></span></a>
+                        </td>
+                        <td align="right">
+                            <a class="btn btn-primary btn-sm" href="/create_vehicle.html?type=bus">Create a bus</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="" data-toggle="modal" data-target="#PassengerView" ng-click="retrievePassengers()">Passengers: <span id="passengers-count"></span></a>
+                        </td>
+                        <td align="right">
+                        </td>
+                    </tr>
+                </table>
+                <table class="table table-striped table-condensed">
+                    <thead>
+                        <th>Route</th>
+                        <th>Current Location</th>
+                        <th>Previous Location</th>
+                        <th>Passengers</th>
+                        <th>Capacity</th>
+                        <th>Speed</th>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="bus in buses">
+                            <td>{{bus.route}}</td>
+                            <td>{{bus.location}}</td>
+                            <td>{{bus.previousLocation}}</td>
+                            <td>{{bus.passengers}}</td>
+                            <td>{{bus.capacity}}</td>
+                            <td>{{bus.speed}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="rightpane">
+                <h4>Rail</h4>
+                <table style="width:100%; height: 10%;">
+                    <tr>
+                        <td>
+                            <a href="/rail/stops.html">Rail Stops: <span id="rail-stops-count"></a>
+                        </td>
+                        <td align="right">
+                            <a class="btn btn-primary btn-sm" href="/create_stop.html?type=rail">Create a rail stop</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/rail/routes.html">Rail Routes: <span id="rail-routes-count"></span></a>
+                        </td>
+                        <td align="right">
+                            <a class="btn btn-primary btn-sm" href="/create_route.html?type=rail">Create a rail route</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="/rail/vehicles.html">Trains: <span id="trains-count">/span></a>
+                        </td>
+                        <td align="right">
+                            <a class="btn btn-primary btn-sm" href="/create_vehicle.html?type=rail">Create a train </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td align="right">
+                            <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">Create a passenger</a>
+                        </td>
+                    </tr>
+                </table>
+                <table class="table table-striped table-condensed">
+                    <thead>
+                        <th>Route</th>
+                        <th>Current Location</th>
+                        <th>Previous Location</th>
+                        <th>Passengers</th>
+                        <th>Capacity</th>
+                        <th>Speed</th>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="rail in rails">
+                            <td>{{rail.route}}</td>
+                            <td>{{rail.location}}</td>
+                            <td>{{rail.previousLocation}}</td>
+                            <td>{{rail.passengers}}</td>
+                            <td>{{rail.capacity}}</td>
+                            <td>{{rail.speed}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <footer class="bg-light">
+            <h4>Group 48</h4>
+            <ul class="ul_inline">
+                <li>Taeyoung Lee / </li>
+                <li>Viral Doshi / </li>
+                <li>Robert Grider / </li>
+                <li>Rafael Arvelo / </li>
+              </ul>
+        </footer>
+    </body>
+</html>
