@@ -1,4 +1,4 @@
-# Group 48 Project 8
+# MTS Project
 
 ## Building
 
